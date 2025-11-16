@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestros Momentos ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .masonry {
+            column-count: 1;
+            column-gap: 1rem;
+        }
+        @media (min-width: 640px) {
+            .masonry { column-count: 2; }
+        }
+        @media (min-width: 1024px) {
+            .masonry { column-count: 3; }
+        }
+        @media (min-width: 1280px) {
+            .masonry { column-count: 4; }
+        }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1rem;
+        }
+        .thumbnail-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .thumbnail-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
+    <!-- Header -->
+    <div class="sticky top-0 bg-white/80 backdrop-blur-md border-b border-pink-100 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-center bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 bg-clip-text text-transparent">
+                Nuestros Momentos
+            </h1>
+            <p class="text-center text-gray-600 mt-2 text-sm md:text-base">
+                Una colección de recuerdos que guardamos juntos
+            </p>
+        </div>
+    </div>
+
+    <!-- Pinterest Grid -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="masonry" id="gallery"></div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 bg-black/95 z-50 hidden items-center justify-center p-4">
+        <!-- Close Button -->
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white hover:text-pink-400 transition-colors p-2 bg-white/10 rounded-full backdrop-blur-sm z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
+        <!-- Navigation Buttons -->
+        <button onclick="prevImage(event)" class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-pink-400 transition-colors p-3 bg-white/10 rounded-full backdrop-blur-sm hover:bg-white/20 z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+
+        <button onclick="nextImage(event)" class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-pink-400 transition-colors p-3 bg-white/10 rounded-full backdrop-blur-sm hover:bg-white/20 z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+
+        <!-- Image Container -->
+        <div class="relative max-w-5xl max-h-[90vh] w-full" onclick="closeLightbox()">
+            <img id="lightboxImage" src="" alt="" class="w-full h-full object-contain rounded-lg" onclick="event.stopPropagation()">
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-lg">
+                <p id="lightboxCaption" class="text-white text-xl font-medium text-center"></p>
+                <p id="lightboxCounter" class="text-pink-300 text-sm text-center mt-2"></p>
+            </div>
+        </div>
+
+        <!-- Thumbnails -->
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-[90vw] pb-2 thumbnail-scroll" id="thumbnails"></div>
+    </div>
+
+    <!-- Footer Message -->
+    <div class="text-center py-12 px-4">
+        <div class="inline-block bg-white/60 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-lg">
+            <p class="text-gray-700 text-lg italic">
+                "Cada foto es un pedacito de mi corazón que comparto contigo"
+            </p>
+            <svg class="w-6 h-6 text-pink-500 mx-auto mt-3 animate-pulse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </div>
+    </div>
+
+    <script>
+        // Aquí pones las URLs de tus imágenes
+        const images = [
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756104782450689/foto1.png?ex=691bacdc&is=691a5b5c&hm=8e534540deb186cb8c16b1cb4ff41a44178e5d02a29146a14ea17866a92aac5c&=&format=webp&quality=lossless&width=550&height=309', caption: 'El peor esquipo del mundo jajaja mentira baby (no es tan malo..)' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756114622287972/foto2.png?ex=691bacdf&is=691a5b5f&hm=850f902002a1975f18890b64ab93ee77881c4d5848e5cd7b0094e363addde61c&=&format=webp&quality=lossless&width=550&height=310', caption: 'Construyendo el castillo que nunca terminé' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756130019704973/foto3.png?ex=691bace2&is=691a5b62&hm=4608e52a71dd15312ca31345a80aa3e941a54b5524a4bd7935d0d9ca70f4521d&=&format=webp&quality=lossless&width=550&height=310', caption: 'Desde otro angulo' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756135610716211/foto4.png?ex=691bace4&is=691a5b64&hm=e8cbcda429be800f1799213a587544cbdbefadecf04c6485e9d6f0e260a0f5d6&=&format=webp&quality=lossless&width=587&height=330', caption: 'Siempre haciendome reir' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756146377232434/foto5.png?ex=691bace6&is=691a5b66&hm=56b79322aae0ecc16ab790c481e716f4fa1cf64a73c2a86d09702032472c5541&=&format=webp&quality=lossless&width=587&height=330', caption: 'Cosa que me encanta de ti' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756153117474826/foto6.png?ex=691bace8&is=691a5b68&hm=4d463cbe7e7fdd96ed6c0d55164e0422c6e21e073e7b7cf7abcb30b825b5521e&=&format=webp&quality=lossless&width=550&height=309', caption: 'Besitos' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756158201106563/foto7.png?ex=691bace9&is=691a5b69&hm=d08ed594b754835bb27d88561b396174a52774b990821a6a89e6ddbb14356742&=&format=webp&quality=lossless&width=550&height=309', caption: 'Mas besitos' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756163141865533/foto8.png?ex=691bacea&is=691a5b6a&hm=fbc53d59ad91344eb7223557a53d4ef2a4f073e87add778100b25efd09af2e79&=&format=webp&quality=lossless&width=587&height=330', caption: 'Junior tu papá' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756171228483645/foto9.png?ex=691bacec&is=691a5b6c&hm=09e95565e8e694abe8ea443c18714a3f897be8cc70a16cd45ea2cff88468b8b7&=&format=webp&quality=lossless&width=587&height=330', caption: 'Mi persona favorita' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756175024590858/foto10.png?ex=691baced&is=691a5b6d&hm=146a267f2d322ecb088e089b6b14243ab11b047bb8d2a6c03613b525f9efbfe4&=&format=webp&quality=lossless&width=587&height=330', caption: 'Sentado con la dueña de mi sonrisa' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756181139886213/foto11.png?ex=691bacee&is=691a5b6e&hm=6fc0098066f514e47b286ae395118369a9dfb638227faf78aaff9f3de779cba1&=&format=webp&quality=lossless&width=587&height=330', caption: 'Juntos para siempre' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756187003519099/foto12.png?ex=691bacf0&is=691a5b70&hm=74778f5e09bb760a577dc45b3e5920d0516cb384ea193cf5dd0bed47a8b69c47&=&format=webp&quality=lossless&width=587&height=330', caption: 'Combinaditos' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756191008817212/foto13.png?ex=691bacf1&is=691a5b71&hm=46b658427311cb75c223ea6afb6b0fa2a58d8c7a9c8a503b7d235b057e5b854a&=&format=webp&quality=lossless&width=587&height=330', caption: 'Tú y yo' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756196583182517/foto14.png?ex=691bacf2&is=691a5b72&hm=c89ba5048db19e6b6ad2b3d0fdd79fc83f1d09a101b5ff4e64895f4c8e4f87ff&=&format=webp&quality=lossless&width=587&height=330', caption: 'Otro besito' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756200970293339/foto15.png?ex=691bacf3&is=691a5b73&hm=ac7509ccab8e8367ec9abde22d1f7c8f757bd45cdba33036982d992b6cc0b8b6&=&format=webp&quality=lossless&width=587&height=330', caption: 'Mi deporte favorito es amarte todos los dias' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756205764513853/foto16.png?ex=691bacf4&is=691a5b74&hm=34086fb50030387927494d213a25d36d3d5604d936721834fde04686fe7c138f&=&format=webp&quality=lossless&width=587&height=330', caption: '<3' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756215373791252/foto17.png?ex=691bacf7&is=691a5b77&hm=9414b0d4c59c6b12956553279b9916145a71d4b9de73a692cad161de82932db4&=&format=webp&quality=lossless&width=550&height=309', caption: 'Sentado con el amor de mi vida' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756219085754368/foto18.png?ex=691bacf8&is=691a5b78&hm=8c278b39e6eef705d9a99be5dcb8a8a7909f68dc40d606460546eb89397fb136&=&format=webp&quality=lossless&width=587&height=330', caption: 'Otro besito más' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756225318227988/foto19.png?ex=691bacf9&is=691a5b79&hm=01d4f6d67914a589e63af16931fcb89355f710a095cc2df5e66eb8434d87d284&=&format=webp&quality=lossless&width=587&height=330', caption: 'Me encantas' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756234961059981/foto20.png?ex=691bacfb&is=691a5b7b&hm=a372a84a2537c2412144ff10db0c2b60e659084ce81e2cf77da03f30d8c5a942&=&format=webp&quality=lossless&width=550&height=309', caption: 'Mi momento favorito' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756237624311858/foto21.png?ex=691bacfc&is=691a5b7c&hm=ad65daa1cd58cfcc421c619b8a478f390314ef99b4e848a6db7ec69125b359eb&=&format=webp&quality=lossless&width=550&height=309', caption: 'Te amo demasiado' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756240531226655/foto22.png?ex=691bacfd&is=691a5b7d&hm=0cb35f6589fd0024a0581574f3dcf9ae3257c732978e5d4c5bc7e2704545508d&=&format=webp&quality=lossless&width=550&height=310', caption: 'Celoso espiando' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756252107505764/foto23.png?ex=691bacff&is=691a5b7f&hm=da95f2550e7386864ec09f6964597c5fdf101fd7e20736cb4e51ea2485fd2f5e&=&format=webp&quality=lossless&width=587&height=330', caption: 'Cuando eras negra jajajaj' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756259640348683/foto24.png?ex=691bad01&is=691a5b81&hm=2b2e5cf29c89128a2b98687e69565d335117b3d61bde5973ecc85f81b5ecc4a7&=&format=webp&quality=lossless&width=587&height=330', caption: 'Cuando te caiste por un agujero jajajsdia' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756264736296961/foto25.png?ex=691bad02&is=691a5b82&hm=fa2066152a22fc1179b0feb2ec8e906d9e2bda3258634ec228f97b251a0d8d5a&=&format=webp&quality=lossless&width=587&height=330', caption: 'Ola' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756269710737599/foto26.png?ex=691bad04&is=691a5b84&hm=fe1d3e9b27831be83307766349801f71fcc1a089f552758eb883fdea5b17884f&=&format=webp&quality=lossless&width=587&height=330', caption: 'Mas besitos' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756274043453570/foto27.png?ex=691bad05&is=691a5b85&hm=8fc9f5874a7dfc9ebbca03eae094d816555135e470bef6b0b51ec937c73997ad&=&format=webp&quality=lossless&width=550&height=310', caption: 'otra por si las moscas' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756279043063850/foto28.png?ex=691bad06&is=691a5b86&hm=8ba4b203061647a41dfaa5ff59c4e7f220d1cbe78df5fcbd200a89c36475026a&=&format=webp&quality=lossless&width=550&height=309', caption: 'Mi chinita, con su camisa toda fea' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756285666136074/foto29.png?ex=691bad07&is=691a5b87&hm=eece3a88dd6c90f24cf75874809aeb95296e67a89f820e6cef9c96bfebad8076&=&format=webp&quality=lossless&width=550&height=309', caption: 'Salida en motico' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756289550061710/foto30.png?ex=691bad08&is=691a5b88&hm=c69167e74044e53603e66a78a2aa0f176c6e4a41839a6668cfd4d739ee8e9242&=&format=webp&quality=lossless&width=550&height=309', caption: 'Beso de rana' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756294608261270/foto31.png?ex=691bad0a&is=691a5b8a&hm=d9138d9e41320fc1a5c795e70056b84484971bcd73c38fab8e730b555617ce1b&=&format=webp&quality=lossless&width=550&height=309', caption: 'Beso de rana desde otro angulo jajaja' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756305010000143/foto32.png?ex=691bad0c&is=691a5b8c&hm=35a910591808e6dbde7e6f87b001a10b6d80adf4672e5c698e4714320b26b821&=&format=webp&quality=lossless&width=550&height=309', caption: 'Aqui paseando' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756310345416735/foto33.png?ex=691bad0d&is=691a5b8d&hm=8211c1199d845be87deee091565e5a055c09d1c42dcef43fcf9c5ddd57c26d20&=&format=webp&quality=lossless&width=550&height=309', caption: 'Con mi jevita preciosa' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756314786926762/foto34.png?ex=691bad0e&is=691a5b8e&hm=576f9e3729f18523d0122c4db27d097956a53138210983d66cbc238fe2a109ef&=&format=webp&quality=lossless&width=550&height=309', caption: 'Desde otro angulo' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756320298504313/foto35.png?ex=691bad10&is=691a5b90&hm=99a7632e311ebe30903c0dd4002e9e145312dca2bc483a3a44371ebc8455eeef&=&format=webp&quality=lossless&width=550&height=309', caption: 'La mejor fotito' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756324840931530/foto36.png?ex=691bad11&is=691a5b91&hm=b314f2a4ca4fe1a588c5c93ae7d2ba6f83afd3155367a9e11655d20d2ad34468&=&format=webp&quality=lossless&width=587&height=330', caption: 'Con su camiseta del junior ajajja' },
+            { url: 'https://media.discordapp.net/attachments/1439754206004248596/1439756336865869894/foto38.png?ex=691bad14&is=691a5b94&hm=af00820a824a61b3dd9b3eefe2ab7ee52b7226156dbb87fe4647ed2afd297912&=&format=webp&quality=lossless&width=550&height=309', caption: 'Te amo demasiado mi niña hermosa' },
+        ];
+
+        let currentIndex = 0;
+
+        // Crear galería
+        const gallery = document.getElementById('gallery');
+        images.forEach((image, index) => {
+            const div = document.createElement('div');
+            div.className = 'masonry-item group cursor-pointer';
+            div.innerHTML = `
+                <div class="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]">
+                    <img src="${image.url}" alt="${image.caption}" class="w-full h-auto object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div class="absolute bottom-0 left-0 right-0 p-4">
+                            <p class="text-white font-medium text-sm md:text-base">${image.caption}</p>
+                        </div>
+                    </div>
+                    <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <svg class="w-6 h-6 text-white drop-shadow-lg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    </div>
+                </div>
+            `;
+            div.onclick = () => openLightbox(index);
+            gallery.appendChild(div);
+        });
+
+        // Crear thumbnails
+        const thumbnails = document.getElementById('thumbnails');
+        images.forEach((image, index) => {
+            const button = document.createElement('button');
+            button.className = 'flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all border-white/30 hover:border-white/60';
+            button.id = `thumb-${index}`;
+            button.innerHTML = `<img src="${image.url}" alt="" class="w-full h-full object-cover">`;
+            button.onclick = (e) => {
+                e.stopPropagation();
+                openLightbox(index);
+            };
+            thumbnails.appendChild(button);
+        });
+
+        function openLightbox(index) {
+            currentIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            const lightboxCaption = document.getElementById('lightboxCaption');
+            const lightboxCounter = document.getElementById('lightboxCounter');
+
+            lightboxImage.src = images[index].url;
+            lightboxCaption.textContent = images[index].caption;
+            lightboxCounter.textContent = `${index + 1} / ${images.length}`;
+            lightbox.classList.remove('hidden');
+            lightbox.classList.add('flex');
+
+            // Update thumbnails
+            document.querySelectorAll('[id^="thumb-"]').forEach((thumb, idx) => {
+                if (idx === index) {
+                    thumb.className = 'flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all border-pink-400 scale-110';
+                } else {
+                    thumb.className = 'flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all border-white/30 hover:border-white/60';
+                }
+            });
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('hidden');
+            lightbox.classList.remove('flex');
+        }
+
+        function nextImage(e) {
+            e.stopPropagation();
+            currentIndex = (currentIndex + 1) % images.length;
+            openLightbox(currentIndex);
+        }
+
+        function prevImage(e) {
+            e.stopPropagation();
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            openLightbox(currentIndex);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (!lightbox.classList.contains('hidden')) {
+                if (e.key === 'ArrowRight') nextImage(e);
+                if (e.key === 'ArrowLeft') prevImage(e);
+                if (e.key === 'Escape') closeLightbox();
+            }
+        });
+    </script>
+</body>
+</html>
